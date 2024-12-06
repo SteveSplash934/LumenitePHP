@@ -3,47 +3,111 @@
 
 require_once(__DIR__ . '/engine.constant.php');
 
+
+
+class Color
+{
+    const RESET = "\033[0m";
+    const BOLD = "\033[1m";
+    const UNDERLINE = "\033[4m";
+    const BLACK = "\033[30m";
+    const RED = "\033[31m";
+    const GREEN = "\033[32m";
+    const YELLOW = "\033[33m";
+    const BLUE = "\033[34m";
+    const MAGENTA = "\033[35m";
+    const CYAN = "\033[36m";
+    const WHITE = "\033[37m";
+    const LIGHT_BLACK = "\033[90m";
+    const LIGHT_RED = "\033[91m";
+    const LIGHT_GREEN = "\033[92m";
+    const LIGHT_YELLOW = "\033[93m";
+    const LIGHT_BLUE = "\033[94m";
+    const LIGHT_MAGENTA = "\033[95m";
+    const LIGHT_CYAN = "\033[96m";
+    const LIGHT_WHITE = "\033[97m";
+
+    // Print generic colored text
+    public static function print($text, $color)
+    {
+        echo $color . $text . self::RESET;
+    }
+    public static function printText($text)
+    {
+        self::print($text, self::WHITE);
+    }
+    // Print error (red)
+    public static function printError($text)
+    {
+        self::print($text, self::RED);
+    }
+
+    // Print warning (yellow)
+    public static function printWarning($text)
+    {
+        self::print($text, self::YELLOW);
+    }
+
+    // Print info (blue)
+    public static function printInfo($text)
+    {
+        self::print($text, self::BLUE);
+    }
+
+    // Print success (green)
+    public static function printSuccess($text)
+    {
+        self::print($text, self::GREEN);
+    }
+
+    // Print debug (cyan)
+    public static function printDebug($text)
+    {
+        self::print($text, self::CYAN);
+    }
+
+    // Print notice (magenta)
+    public static function printNotice($text)
+    {
+        self::print($text, self::MAGENTA);
+    }
+
+    // Function to print bold colored text
+    public static function printBold($text, $color)
+    {
+        echo self::BOLD . $color . $text . self::RESET;
+    }
+}
+
+
 class CLI
 {
-    private $CLI_COMMANDS = array(
-        "create" => "create",
-        "config" => "config",
-        "init" => "init",
-        "serve" => "serve",
-        "build" => "build",
-        "watch" => "watch",
-        "seed" => "seed",
-        "test" => "test",
-        "deploy" => "deploy",
-        "rollback" => "rollback",
-        "status" => "status",
-        "version" => "version",
-        "help" => "help",
-        "info" => "info",
-        "clear" => "clear",
-        "optimize" => "optimize",
-        "update" => "update",
-        "logs" => "logs",
-        "debug" => "debug",
-        "validate" => "validate",
-        "lint" => "lint",
-        "key" => "key",
-        "run" => "run",
-        "key:generate" => "key_generate",
-        "cert" => "cert",
-        "cert:generate" => "cert_generate",
-        "migrate" => "migrate",
-        "migrate:rollback" => "migrate_rollback",
-        "migrate:reset" => "migrate_reset",
-        "m" => "migrate"
-    );
+    const LUMENITE_VERSION = '1.0.0';
 
+    private $CLI_COMMANDS = array(
+        "create" => "create",   // for project initialization
+        "config" => "config",   // for configuration management
+        "init" => "init",       // for initial setup
+        "serve" => "serve",     // if you need a local development server
+        "build" => "build",     // for building assets or the app
+        "status" => "status",   // to check the current state or health of the app
+        "version" => "version", // to show the app's version
+        "help" => "help",       // for showing help
+        "logs" => "logs",       // to view logs
+        "debug" => "debug",     // for debugging tasks
+        "migrate" => "migrate", // for managing database migrations
+        "migrate:rollback" => "migrate_rollback", // to rollback migrations
+        "migrate:reset" => "migrate_reset", // to reset migrations
+        "install" => "install"
+    );
 
     private $argv;
     private $argc = 0;
 
     public function __construct($argv, $argc)
     {
+        $this->banner();
+
         $this->argv = $argv;
         $this->argc = $argc;
         $cmd = (string) ($this->argv[1] ?? null);
@@ -154,7 +218,6 @@ class CLI
 
     public function create($params = [], $overwrite = false)
     {
-        $this->banner();
         if (!empty($params)) {
             if (file_exists((string) $params[0]) && !$overwrite) {
                 echo "Directory '" . $params[0] . "' already exists, do you want to overwrite? [Y/n]: ";
@@ -179,6 +242,8 @@ class CLI
                 } else {
                     echo "Creating app: " . $params[0] . "...";
                     mkdir((string)$params[0]);
+
+                    $dbName = strtolower(str_replace('-', '_', $params[0]) . "_db");
                     $projectStructure = [
                         "" . $params[0] . "" => [
                             "app" => [
@@ -211,7 +276,49 @@ class CLI
                             "config" => [
                                 "database.php" => "<?php\n// Database configurations",
                                 "app.php" => "<?php\n// General app settings",
-                                "routes.php" => "<?php\n// Route definitions"
+                                "routes.php" => "<?php\n// Route definitions",
+                                "config.php" =>  <<< CONFIGFILEDATA
+                                <?php
+                                
+                                // Load config.ini file
+                                \$configFile = __DIR__ . '/config.ini';
+                                if (!file_exists(\$configFile)) {
+                                    die('Configuration file not found!');
+                                }
+                                
+                                // Parse the config.ini file into an associative array
+                                \$config = parse_ini_file(\$configFile, true);
+                                
+                                // Convert configuration values into PHP constants or variables for the app
+                                define('APP_NAME', \$config['General Settings']['app_name']);
+                                define('APP_VERSION', \$config['General Settings']['app_version']);
+                                define('APP_ENV', \$config['General Settings']['environment']);
+                                define('APP_DEBUG', filter_var(\$config['General Settings']['debug'], FILTER_VALIDATE_BOOLEAN));
+                                define('DISPLAY_ERRORS', filter_var(\$config['General Settings']['display_errors'], FILTER_VALIDATE_BOOLEAN));
+                                
+                                define('HOST', \$config['Server Settings']['host']);
+                                define('PORT', \$config['Server Settings']['port']);
+                                
+                                define('VIEW_ENGINE', \$config['View Engine Configuration']['view_engine']);
+                                
+                                define('DB_HOST', \$config['Database Configuration']['db_host']);
+                                define('DB_PORT', \$config['Database Configuration']['db_port']);
+                                define('DB_NAME', \$config['Database Configuration']['db_name']);
+                                define('DB_USER', \$config['Database Configuration']['db_user']);
+                                define('DB_PASSWORD', \$config['Database Configuration']['db_password']);
+                                
+                                define('CACHE_ENABLED', filter_var(\$config['Caching and Storage Settings']['cache_enabled'], FILTER_VALIDATE_BOOLEAN));
+                                define('CACHE_DRIVER', \$config['Caching and Storage Settings']['cache_driver']);
+                                define('STORAGE_PATH', \$config['Caching and Storage Settings']['storage_path']);
+                                
+                                define('LOG_ENABLED', filter_var(\$config['Logging Settings']['log_enabled'], FILTER_VALIDATE_BOOLEAN));
+                                define('LOG_LEVEL', \$config['Logging Settings']['log_level']);
+                                
+                                define('APP_KEY', \$config['Security Settings']['app_key']);
+                                
+                                ?>
+                                CONFIGFILEDATA
+
                             ],
                             "storage" => [
                                 "cache" => [],
@@ -223,8 +330,42 @@ class CLI
                             ".env" => "APP_ENV=local\nAPP_DEBUG=true\nAPP_KEY=",
                             "composer.json" => "{\n    \"require\": {}\n}",
                             "lumenite.php" => "<?php\n// CLI entry point",
-                            "config.conf" => "# General Settings\napp_name = \"LumeniteApp\"\napp_version = \"1.0.0\"\nenvironment = \"local\"  # local, production, etc.\ndebug = true           # Set to true for development, false for production\ndisplay_errors = true  # Show errors on screen\n\n# Server Settings\nhost = \"127.0.0.1\"\nport = 8000\n\n# View Engine Configuration\nview_engine = \"Renderize\"  # Options: \"Renderize\", \"Blade\", \"ReactJS\", \"Vue\", \"vanilla\"\n\n# Database Configuration (Example for future DB integration)\ndatabase_engine = \"mysql\"  # Options: \"mysql\", \"sqlite\", etc.\ndb_host = \"localhost\"\ndb_port = \"3306\"\ndb_name = \"lumenite_db\"\ndb_user = \"root\"\ndb_password = \"\"\n\n# Caching and Storage Settings\ncache_enabled = true\ncache_driver = \"file\"  # Options: \"file\", \"redis\", etc.\nstorage_path = \"storage\"\n\n# Logging Settings\nlog_enabled = true\nlog_level = \"debug\"  # Options: \"debug\", \"info\", \"error\", etc.\n\n# Security Settings\napp_key = \"your-secret-key\"  # Set a strong key for encryption (e.g., JWT)\n",
-                            "README.md" => "# MyWebApp\nThis is a LumenitePHP project."
+                            "config.ini" =>  <<<configFileContent
+[General Settings]
+app_name = "$params[0]"
+app_version = "1.0.0"
+environment = "local" ; local, production, etc.
+debug = true ; Set to true for development, false for production
+display_errors = true ; Show errors on screen
+
+[Server Settings]
+host = "127.0.0.2"
+port = 8008
+
+[View Engine Configuration]
+view_engine = "Renderize" ; Options: "Renderize", "Blade", "ReactJS", "Vue", "vanilla"
+
+[Database Configuration]
+database_engine = "mysql" ; Options: "mysql", "sqlite", etc.
+db_host = "localhost"
+db_port = 3306
+db_name = "$dbName"
+db_user = "root"
+db_password = ""
+
+[Caching and Storage Settings]
+cache_enabled = true
+cache_driver = "file" ; Options: "file", "redis", etc.
+storage_path = "storage"
+
+[Logging Settings]
+log_enabled = true
+log_level = "debug" ; Options: "debug", "info", "error", etc.
+
+[Security Settings]
+app_key = "your-secret-key" ; Set a strong key for encryption (e.g., JWT)
+
+configFileContent
                         ]
                     ];
 
@@ -240,7 +381,7 @@ class CLI
 
     public function banner()
     {
-        echo <<<BANNER
+        $BANNER = <<<BANNER
 ·······························································
 : _                               _ _       ____  _   _ ____  :
 :| |   _   _ _ __ ___   ___ _ __ (_) |_ ___|  _ \| | | |  _ \ :
@@ -248,14 +389,14 @@ class CLI
 :| |__| |_| | | | | | |  __/ | | | | ||  __/  __/|  _  |  __/ :
 :|_____\__,_|_| |_| |_|\___|_| |_|_|\__\___|_|   |_| |_|_|    :
 ·······························································
-
 BANNER;
+
+        Color::printBold($BANNER, Color::GREEN);
     }
 
     public function help()
     {
-        $this->banner();
-        echo <<<HELPTEXT
+        $HELPTEXT = <<<HELPTEXT
     
     > HELP
     --------------------------
@@ -305,117 +446,71 @@ BANNER;
        - migrate:status   : Show the status of migrations (whether they've been run or not).
 
     HELPTEXT;
+
+        Color::printBold($HELPTEXT, Color::WHITE);
+    }
+    private function config() {}
+    private function init() {}
+
+    private function serve($args)
+    {
+        // Check if the project name is provided
+        if (count($args) < 1) {
+            echo "Error: Project name is required.\n";
+            exit(1);
+        }
+
+        $projectName = $args[0];
+        $projectDir = __DIR__ . "/$projectName/public";
+
+        // Check if the directory exists
+        if (!is_dir($projectDir)) {
+            echo "Error: Directory '$projectDir' does not exist.\n";
+            exit(1);
+        }
+
+        // Load the configuration file for host and port
+        $configFile = __DIR__ . "/$projectName/config.ini";
+        if (!file_exists($configFile)) {
+            echo "Error: Configuration file not found at '$configFile'.\n";
+            exit(1);
+        }
+
+        $config = parse_ini_file($configFile, true);
+
+        $host = $config['Server Settings']['host'] ?? '127.0.0.1';
+        $port = $config['Server Settings']['port'] ?? 8000;
+
+        // Escape the project directory path to handle spaces
+        $escapedProjectDir = escapeshellarg($projectDir);
+
+        // Construct and run the PHP server command
+        $command = sprintf("php -S %s:%d -t %s > NUL 2>&1", $host, $port, $escapedProjectDir);
+        $date = date("Y-m-d H:i:s");
+        Color::printInfo("\n(INFO) [$date] ");
+        Color::printText("Starting development server for '$projectName' at http://$host:$port");
+        Color::printInfo("\n(INFO) [$date] ");
+        Color::printText("Now serving public directory of '$projectName'\n");
+        Color::printWarning("Press Ctrl+C to stop the server\n");
+
+        // Execute the command
+        passthru($command);
     }
 
-    private function config()
-    {
-        echo "config called!";
-    }
-    private function init()
-    {
-        echo "init called!";
-    }
-    private function serve()
-    {
-        echo "serve called!";
-    }
-    private function build()
-    {
-        echo "build called!";
-    }
-    private function watch()
-    {
-        echo "watch called!";
-    }
-    private function seed()
-    {
-        echo "seed called!";
-    }
-    private function test()
-    {
-        echo "test called!";
-    }
-    private function deploy()
-    {
-        echo "deploy called!";
-    }
-    private function rollback()
-    {
-        echo "rollback called!";
-    }
-    private function status()
-    {
-        echo "status called!";
-    }
+
+    private function build() {}
+    private function status() {}
+
     private function version()
     {
-        echo "version called!";
-    }
-    private function info()
-    {
-        echo "info called!";
-    }
-    private function clear()
-    {
-        echo "clear called!";
-    }
-    private function optimize()
-    {
-        echo "optimize called!";
-    }
-    private function update()
-    {
-        echo "update called!";
-    }
-    private function logs()
-    {
-        echo "logs called!";
-    }
-    private function debug()
-    {
-        echo "debug called!";
-    }
-    private function validate()
-    {
-        echo "validate called!";
-    }
-    private function lint()
-    {
-        echo "lint called!";
-    }
-    private function key()
-    {
-        echo "key called!";
-    }
-    private function cert()
-    {
-        echo "cert called!";
-    }
-    private function migrate()
-    {
-        echo "migrate called!";
-    }
-    private function key_generate()
-    {
-        echo "key_generate called!";
-    }
-    private function cert_generate()
-    {
-        echo "cert_generate called!";
-    }
-    private function migrate_rollback()
-    {
-        echo "migrate_rollback called!";
-    }
-    private function migrate_reset()
-    {
-        echo "migrate_reset called!";
+        Color::printInfo("\n[VERSION] LumeniteApp v" . self::LUMENITE_VERSION . "\n");
     }
 
-    private function run()
-    {
-        echo "run called!";
-    }
+
+    private function logs() {}
+    private function debug() {}
+    private function migrate() {}
+    private function install() {}
 }
 
 
