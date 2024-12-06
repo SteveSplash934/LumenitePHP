@@ -7,34 +7,35 @@ class CLI
 {
     private $CLI_COMMANDS = array(
         "create" => "create",
-        "config" => "",
-        "init" => "",
-        "serve" => "",
-        "build" => "",
-        "watch" => "",
-        "seed" => "",
-        "test" => "",
-        "deploy" => "",
-        "rollback" => "",
-        "status" => "",
-        "version" => "",
-        "help" => "",
-        "info" => "",
-        "clear" => "",
-        "optimize" => "",
-        "update" => "",
-        "logs" => "",
-        "debug" => "",
-        "validate" => "",
-        "lint" => "",
-        "key" => "",
-        "key:generate" => "",
-        "cert" => "",
-        "cert:generate" => "",
-        "migrate" => "",
-        "migrate:rollback" => "",
-        "migrate:reset" => "",
-        "m" => ""
+        "config" => "config",
+        "init" => "init",
+        "serve" => "serve",
+        "build" => "build",
+        "watch" => "watch",
+        "seed" => "seed",
+        "test" => "test",
+        "deploy" => "deploy",
+        "rollback" => "rollback",
+        "status" => "status",
+        "version" => "version",
+        "help" => "help",
+        "info" => "info",
+        "clear" => "clear",
+        "optimize" => "optimize",
+        "update" => "update",
+        "logs" => "logs",
+        "debug" => "debug",
+        "validate" => "validate",
+        "lint" => "lint",
+        "key" => "key",
+        "run" => "run",
+        "key:generate" => "key_generate",
+        "cert" => "cert",
+        "cert:generate" => "cert_generate",
+        "migrate" => "migrate",
+        "migrate:rollback" => "migrate_rollback",
+        "migrate:reset" => "migrate_reset",
+        "m" => "migrate"
     );
 
 
@@ -302,7 +303,120 @@ BANNER;
        - migrate:rollback : Rollback the last batch of migrations.
        - migrate:reset    : Reset all migrations to a fresh state.
        - migrate:status   : Show the status of migrations (whether they've been run or not).
+
     HELPTEXT;
     }
+
+    private function config()
+    {
+        echo "config called!";
+    }
+    private function init()
+    {
+        echo "init called!";
+    }
+    private function serve()
+    {
+        echo "serve called!";
+    }
+    private function build()
+    {
+        echo "build called!";
+    }
+    private function watch()
+    {
+        echo "watch called!";
+    }
+    private function seed()
+    {
+        echo "seed called!";
+    }
+    private function test()
+    {
+        echo "test called!";
+    }
+    private function deploy()
+    {
+        echo "deploy called!";
+    }
+    private function rollback()
+    {
+        echo "rollback called!";
+    }
+    private function status()
+    {
+        echo "status called!";
+    }
+    private function version()
+    {
+        echo "version called!";
+    }
+    private function info()
+    {
+        echo "info called!";
+    }
+    private function clear()
+    {
+        echo "clear called!";
+    }
+    private function optimize()
+    {
+        echo "optimize called!";
+    }
+    private function update()
+    {
+        echo "update called!";
+    }
+    private function logs()
+    {
+        echo "logs called!";
+    }
+    private function debug()
+    {
+        echo "debug called!";
+    }
+    private function validate()
+    {
+        echo "validate called!";
+    }
+    private function lint()
+    {
+        echo "lint called!";
+    }
+    private function key()
+    {
+        echo "key called!";
+    }
+    private function cert()
+    {
+        echo "cert called!";
+    }
+    private function migrate()
+    {
+        echo "migrate called!";
+    }
+    private function key_generate()
+    {
+        echo "key_generate called!";
+    }
+    private function cert_generate()
+    {
+        echo "cert_generate called!";
+    }
+    private function migrate_rollback()
+    {
+        echo "migrate_rollback called!";
+    }
+    private function migrate_reset()
+    {
+        echo "migrate_reset called!";
+    }
+
+    private function run()
+    {
+        echo "run called!";
+    }
 }
+
+
 $LumeniteCLI = new CLI($argv, $argc);
