@@ -1,0 +1,5 @@
+- add build command
+- add logo & prepare the landing page
+- integrate vite
+- user option to enter project name, choose project UI framework: Renderize, ReactJS, NextJS, Vue, Angular etc
+- ask maybe user will be using TypeScript or Javascript

@@ -217,7 +217,6 @@ class CLI
 
     public function create($params = [], $overwrite = false)
     {
-        // LMNPHP_FILE_CONTENTS;
         if (!empty($params)) {
             if (file_exists((string) $params[0]) && !$overwrite) {
                 echo "Directory '" . $params[0] . "' already exists, do you want to overwrite? [Y/n]: ";
@@ -240,7 +239,7 @@ class CLI
                     echo "Project aborted! '" . $params[0] . "' is not a dir but exists as a file!\n";
                     exit();
                 } else {
-                    echo "Creating app: " . $params[0] . "...";
+                    echo "Creating app: " . $params[0] . "...\n";
                     mkdir((string)$params[0]);
 
                     $dbName = strtolower(str_replace('-', '_', $params[0]) . "_db");
@@ -262,13 +261,16 @@ class CLI
                                 ],
                                 "database" => ["schema.sql" => LMNPHP_FILE_CONTENTS['WelcomeDBSchema']],
                                 "core" => [
-                                    "App.lmn.php" => LMNPHP_FILE_CONTENTS['LMN_App'],
-                                    "Controller.lmn.php" => LMNPHP_FILE_CONTENTS['LMN_Controller'],
-                                    "Database.lmn.php" => LMNPHP_FILE_CONTENTS['LMN_Database'],
-                                    "Model.lmn.php" => LMNPHP_FILE_CONTENTS['LMN_Model'],
-                                    "Middleware.lmn.php" => LMNPHP_FILE_CONTENTS['LMN_Middleware'],
-                                    "Router.lmn.php" => LMNPHP_FILE_CONTENTS['LMN_Router'],
-                                    "View.lmn.php" => LMNPHP_FILE_CONTENTS['LMN_View'],
+                                    // "App.php" => LMNPHP_FILE_CONTENTS['LMN_App'],
+                                    "Request.php" => LMNPHP_FILE_CONTENTS['LMN_Request'],
+                                    // "Config.php" => LMNPHP_FILE_CONTENTS['LMN_Config'],
+                                    "Response.php" => LMNPHP_FILE_CONTENTS['LMN_Response'],
+                                    "Controller.php" => LMNPHP_FILE_CONTENTS['LMN_Controller'],
+                                    "Database.php" => LMNPHP_FILE_CONTENTS['LMN_Database'],
+                                    "Model.php" => LMNPHP_FILE_CONTENTS['LMN_Model'],
+                                    "Middleware.php" => LMNPHP_FILE_CONTENTS['LMN_Middleware'],
+                                    "Router.php" => LMNPHP_FILE_CONTENTS['LMN_Router'],
+                                    "View.php" => LMNPHP_FILE_CONTENTS['LMN_View'],
                                 ],
                                 "router" => ["routes.php" => LMNPHP_FILE_CONTENTS['DefaultRoutes']]
                             ],
@@ -294,7 +296,7 @@ class CLI
                             "test" => [],
                             "vendor" => [],
                             // ".env" => "APP_ENV=local\nAPP_DEBUG=true\nAPP_KEY=",
-                            "composer.json" => "{\n    \"require\": {}\n}",
+                            "composer.json" => LMNPHP_FILE_CONTENTS["ComposerData"],
                             "config.ini" =>  <<<configFileContent
 [General Settings]
 app_name = "$params[0]"
@@ -336,7 +338,20 @@ configFileContent
 
                     $baseDir = __DIR__;
                     $this->createProjectStructure($baseDir, $projectStructure);
-                    echo "Done!\n";
+                    $command = "cd $params[0] && composer dump-autoload";
+                    exec($command, $output, $status);
+                    if ($status === 0) {
+                        Color::printSuccess(implode("\n", $output));
+                        echo "\n";
+                    } else {
+                        Color::printError("[ERROR] Running composer dump-autoload.\n");
+                        Color::printInfo("[INFO] You can try this commands: \n");
+                        Color::printWarning("\t> ");
+                        Color::printText("cd $params[0]\n");
+                        Color::printWarning("\t> ");
+                        Color::printText("composer dump-autoload");
+                        echo "\n";
+                    }
                 }
             }
         } else {
@@ -450,7 +465,7 @@ BANNER;
         // Escape the project directory path to handle spaces
         $escapedProjectDir = escapeshellarg($projectDir . '/');
 
-        $logPath =  escapeshellarg($projectName . '/logs/server.log');
+        $logPath =  escapeshellarg($projectName . '/log/server.log');
 
         // Construct and run the PHP server command
         $command = sprintf("php -S %s:%d -t %s > %s 2>&1", $host, $port, $escapedProjectDir, $logPath);
