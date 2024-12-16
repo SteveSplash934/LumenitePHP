@@ -1,0 +1,14 @@
+{
+  "name": "LumenitePHP/lumenitephp",
+  "description": "A modern PHP engine for serverless and server-based web applications with seamless UI integrations",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "LumenitePHP\\": "/"
+    }
+  },
+  "require": {
+    "php": "^7.4 || ^8.0"
+  }
+}

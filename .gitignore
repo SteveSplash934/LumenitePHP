@@ -1,8 +1,8 @@
 *app
 *.rar
 *.zip
-lumenitephp
 phase1
 .phar
 # *phar*
 todo.md
+apps-demo
