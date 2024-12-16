@@ -1,4 +1,4 @@
 git add *
-git commit -m "CLI-to-Project creation now working fine for the first time"
+git commit -m "CLI & LumenitePHP now in one place, working on exe now"
 git branch -M main
 git push
