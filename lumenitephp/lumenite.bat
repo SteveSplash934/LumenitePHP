@@ -1,2 +1,2 @@
 @echo off
-php lumenitephp %*
+php C:\lumenite\lumenite %*

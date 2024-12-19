@@ -233,6 +233,7 @@ class CLI
                     echo "Project aborted! '" . $params[0] . "' is not a dir but exists as a file!\n";
                     exit();
                 } else {
+                    // echo "What is your app named? .... ";
                     echo "Creating app: " . $params[0] . "...\n";
                     mkdir((string)$params[0]);
 
@@ -289,7 +290,7 @@ class CLI
                             "log" => ["logs" => ""],
                             "test" => [],
                             "vendor" => [],
-                            // ".env" => "APP_ENV=local\nAPP_DEBUG=true\nAPP_KEY=",
+                            "package.json" => "",
                             "composer.json" => LMNPHP_FILE_CONTENTS["ComposerData"],
                             "config.ini" =>  <<<configFileContent
 [General Settings]
@@ -330,8 +331,13 @@ configFileContent
                         ]
                     ];
 
-                    $baseDir = __DIR__;
+                    $baseDir = getcwd();
                     $this->createProjectStructure($baseDir, $projectStructure);
+                    // copy res files
+                    $assetsDir = $baseDir . "/" . $params[0] . "/public/assets/";
+                    // echo $assetsDir;
+                    $this->copyFile(__DIR__ . '/bin/static/lumenite.png', $assetsDir . "images/lumenite.png"); // copy the logo
+
                     $command = "cd $params[0] && composer dump-autoload";
                     exec($command, $output, $status);
                     if ($status === 0) {
@@ -427,6 +433,35 @@ BANNER;
     private function config() {}
     private function init() {}
 
+
+    private function copyFile($source, $destination)
+    {
+        echo "Copying file from $source to $destination...\n";
+        // Check if source file exists
+        if (!file_exists($source)) {
+            echo "Source file does not exist.\n";
+            return false;
+        }
+
+        // Check if destination directory exists, create it if not
+        $destinationDir = dirname($destination);
+        if (!is_dir($destinationDir)) {
+            if (!mkdir($destinationDir, 0777, true)) {
+                echo "Failed to create destination directory.\n";
+                return false;
+            }
+        }
+
+        // Try to copy the file
+        if (copy($source, $destination)) {
+            // echo "File copied successfully from $source to $destination.\n";
+            return true;
+        } else {
+            echo "Failed to copy the file.\n";
+            return false;
+        }
+    }
+
     private function serve($args)
     {
         // Check if the project name is provided
@@ -436,7 +471,9 @@ BANNER;
         }
 
         $projectName = $args[0];
-        $projectDir = __DIR__ . "/$projectName/public";
+        $projectDir = getcwd() . "/$projectName/public";
+        // echo $projectDir;
+        // exit();
 
         // Check if the directory exists
         if (!is_dir($projectDir)) {
@@ -445,7 +482,7 @@ BANNER;
         }
 
         // Load the configuration file for host and port
-        $configFile = __DIR__ . "/$projectName/config.ini";
+        $configFile = getcwd() . "/$projectName/config.ini";
         if (!file_exists($configFile)) {
             echo "Error: Configuration file not found at '$configFile'.\n";
             exit(1);

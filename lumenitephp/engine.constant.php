@@ -648,11 +648,44 @@ use App\Core\Model;
 class WelcomeModel extends Model
 {
     public static \$pageTitle = "Welcome to LumenitePHP!";
-    public static \$pageSubText = "A lightweight and powerful PHP framework for building fast applications ";
-    public static \$pageHeaderText = "Explore the Power of LumenitePHP Framework";
+    public static \$pageHeroText = "Welcome to Lumenite PHP!";
+    public static \$pageSubText = "A lightweight and powerful PHP framework for building fast serverless and server-based applications.";
+    public static \$exploreText = "Explore the Power of LumenitePHP Framework";
     public static \$logo = [
         'alt' => 'Lumenite Logo',
         'src' => 'assets/images/lumenite.png',
+    ];
+    public static \$bottomNavLinks = [
+        [
+            'link_text' => 'Documentation',
+            'link_url' => 'https://examples.com//docs',
+            'link_icon' => 'fas fa-code mr-2',
+        ],
+        [
+            'link_text' => 'Templates',
+            'link_url' => 'https://examples.com/templates',
+            'link_icon' => 'fas fa-layer-group mr-2',
+        ],
+        [
+            'link_text' => 'Explore',
+            'link_url' => 'https://examples.com/explore',
+            'link_icon' => 'fas fa-compass mr-2',
+        ],
+        [
+            'link_text' => 'Forums',
+            'link_url' => 'https://examples.com/forums',
+            'link_icon' => 'fas fa-comments mr-2',
+        ],
+        [
+            'link_text' => 'Hosting',
+            'link_url' => 'https://examples.com/hosting',
+            'link_icon' => 'fas fa-server mr-2',
+        ],
+        [
+            'link_text' => 'Examples',
+            'link_url' => 'https://examples.com/examples',
+            'link_icon' => 'fas fa-book mr-2',
+        ]
     ];
 }
 
@@ -665,6 +698,7 @@ namespace App\Controller;
 use App\Core\Controller;
 use App\Model\WelcomeModel;
 
+require_once __DIR__ . '/../../app/view/components/Welcome.comp.php';
 class WelcomeController extends Controller
 {
     public function index()
@@ -672,8 +706,10 @@ class WelcomeController extends Controller
         \$this->view->render('Welcome', \$data = [
             'pageTitle' => WelcomeModel::\$pageTitle,
             'pageSubText' => WelcomeModel::\$pageSubText,
-            'pageHeaderText' => WelcomeModel::\$pageHeaderText,
+            'pageHeroText' => WelcomeModel::\$pageHeroText,
             'logo' => WelcomeModel::\$logo,
+            'exploreText' => WelcomeModel::\$exploreText,
+            'bottomNavLinks' => WelcomeModel::\$bottomNavLinks,
         ]);
     }
 }
@@ -684,28 +720,96 @@ WelcomeController,
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><?php echo \$data['pageTitle']; ?></title>
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer" />
+    <link
+        href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+        rel="stylesheet" />
     <link rel="stylesheet" href="assets/css/style.css">
+
 </head>
 
-<body>
-    <div class="bg-cover">
-        <div>
-            <img class="image" src="<?php echo \$data['logo']['src']; ?>" alt="<?php echo \$data['logo']['alt']; ?>" width="92px" height="92px">
-        </div>
-        <p class="legend-text"><?php echo \$data['pageTitle']; ?></p>
-        <p class="sub-text"><?php echo \$data['pageSubText']; ?></p>
-        <p class="header-text"><?php echo \$data['pageHeaderText']; ?></p>
-    </div>
+<body
+    class="bg-white-100 h-screen flex items-center justify-center font-sans p-3">
+    <div class="text-center">
+        <?php render_logo_image([
+            'src' => 'assets/images/lumenite.png',
+            'alt' => 'Lumenite Logo',
+        ]); ?>
 
+        <h1 class="text-4xl font-bold text-gray-800"><?php echo \$data['pageHeroText']; ?></h1>
+        <p class="text-lg text-gray-600 mt-4">
+            <?php echo \$data['pageSubText']; ?>
+        </p>
+
+        <p class="text-lg text-gray-600 mt-6 underline"><?php echo \$data['exploreText']; ?></p>
+        <?php render_nav_link(create_links_comp(
+            \$data['bottomNavLinks'],
+            'text-gray-800 hover:text-purple-500 border border-gray-300 rounded-lg py-2 px-4 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500 inline-block'
+        ));
+        ?>
+    </div>
 </body>
 <script src="assets/js/script.js"></script>
 
 </html>
 WelcomeView,
 "WelcomeComp" => <<< WelcomeComp
+<?php
+function create_links_comp(\$data, \$common_comp)
+{
+    if (empty(\$data)) {
+        return "No data found";
+        exit(1);
+    }
+
+    \$allCompData = "";
+
+    foreach (\$data as \$comp) {
+        \$link_text = \$comp['link_text'];
+        \$link_url = \$comp['link_url'];
+        \$link_icon = \$comp['link_icon'];
+        \$link_class = \$common_comp;
+        \$allCompData .= <<<LINKCOMP
+        <a href="\$link_url" class="\$link_class">
+        <i class="\$link_icon"></i> \$link_text
+        </a>
+
+        LINKCOMP;
+    }
+
+    return \$allCompData;
+}
+
+function render_nav_link(\$links)
+{
+    echo <<<NAVLINKS
+     <nav class="space-x-6 text-white mt-6">
+        \$links
+     </nav>
+    NAVLINKS;
+    
+}
+
+
+function render_logo_image(\$logo)
+{
+    echo <<<LOGO
+    <img
+    src="\$logo[src]"
+    alt="\$logo[alt]"
+    class="mx-auto mb-2"
+    width="150px"
+    height="150px" />
+    LOGO;
+}
 WelcomeComp,
 "WelcomeDBSchema" => <<< WelcomeDBSchema
 WelcomeDBSchema,
@@ -722,46 +826,12 @@ use App\Core\Router;
 
 DefaultRoutes,
 "DefaultCSS" =>  <<< DefaultCSS
-*{
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-body{
-    width: 100vw;
-    height: 100vh;
-    background-image: url('../images/bg.jpg');
-   
-}
-.bg-cover{
-   width: 100%;
-   height: 100%;
-    background-color: rgba(1, 29, 46, 0.7);
-    backdrop-filter: blur(0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    color: white;
-}
-.legend-text{
-    font: 32px verdana;
-    margin-bottom: 10px;
-}
-.sub-text{
-    font: 20px verdana;
-    margin-bottom: 10px;
-}
-.header-text{
-    font: 16px verdana;
-}
-.image{
-    border-radius: 100%;
+body {
+    background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
 }
 DefaultCSS,
 "DefaultJS" =>  <<< DefaultJS
-window.alert(1);
+console.log("It works!!!");
 DefaultJS,
 "EntryPoint" =>  <<< EntryPoint
 <?php
